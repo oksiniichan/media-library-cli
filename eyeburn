@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Base path to the directories
+BASE_PATH="/media/544538a9-f207-4afd-a339-b05bc4fde2b3"
+MOVIES_DIR="${BASE_PATH}/movies"
+SHOWS_DIR="${BASE_PATH}/shows"
+
+# Function to list directories with numbers and capture the selection
+list_directories_with_numbers() {
+    local dir="$1"
+    local selection_var="$2"
+    
+    echo "Listing directories in $dir:"
+    
+    # Get directories, sort, and number them
+    directories=$(find "$dir" -maxdepth 1 -type d ! -name "$(basename "$dir")" | awk -F'/' '{print $NF}' | sort | nl -s'. ')
+    
+    # Print numbered directories
+    echo "$directories"
+    
+    # Capture user selection
+    read -r "$selection_var"
+}
+
+# Main menu
+echo -e "Select one:\n1. Movies\n2. Shows"
+read -r selection
+
+case $selection in
+    1)
+        list_directories_with_numbers "$MOVIES_DIR" user_selection
+        ;;
+    2)
+        list_directories_with_numbers "$SHOWS_DIR" user_selection
+        ;;
+    *)
+        echo "Invalid selection. Please enter 1 for Movies or 2 for Shows."
+        exit 1
+        ;;
+esac
+
+# Validate and run selected directory with mpv
+if [[ "$user_selection" =~ ^[0-9]+$ ]]; then
+    # Get the full directory path based on the selection
+    if [ "$selection" -eq 1 ]; then
+        selected_dir=$(find "$MOVIES_DIR" -maxdepth 1 -type d ! -name "$(basename "$MOVIES_DIR")" | awk -F'/' '{print $NF}' | sort | awk "NR==$user_selection")
+        full_path="$MOVIES_DIR/$selected_dir"
+    elif [ "$selection" -eq 2 ]; then
+        selected_dir=$(find "$SHOWS_DIR" -maxdepth 1 -type d ! -name "$(basename "$SHOWS_DIR")" | awk -F'/' '{print $NF}' | sort | awk "NR==$user_selection")
+        full_path="$SHOWS_DIR/$selected_dir"
+    fi
+    
+    if [ -n "$selected_dir" ]; then
+        echo "Running mpv on \"$full_path\""
+        mpv "$full_path"
+    else
+        echo "Invalid selection number."
+    fi
+else
+    echo "Invalid input. Please enter a number."
+fi
