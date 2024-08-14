@@ -5,4 +5,4 @@ It requires mpv.
 
 Change path to your media folder in the script.
 
-You can use it with save-position-on-quit on mpv and it will be just like jellyfin lite ig?
+You can use it with save-position-on-quit on mpv and it will be just.. amazing.
